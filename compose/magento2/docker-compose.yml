@@ -1,0 +1,92 @@
+# Mage Inferno Docker Compose (https://github.com/mageinferno/magento2-docker-compose)
+# Version 2.0.0
+
+app:
+  image: localhost:5000/magento-nginx:1.9
+  container_name: magento-app
+  ports:
+    - "80:80"
+  links:
+    - magento-php-fpm
+    - db
+  volumes_from:
+    - composer
+    - appdata
+    - cache
+  environment:
+    - APP_MAGE_MODE=default
+    - VIRTUAL_HOST=192.168.0.71
+    - PHP_HOST=magento-php-fpm
+    - PHP_PORT=9000
+
+cache:
+  container_name: magento-data-cache
+  image: localhost:5000/true
+  volumes:
+    - magento-data-cache:/var/cache/nginx
+
+composer:
+  container_name: magento-data-composer
+  image: localhost:5000/true
+  volumes:
+    - magento-data-composer:/root/.composer
+
+appdata:
+  container_name: magento-data-src
+  image: localhost:5000/true
+  volumes:
+    - magento-data-src:/src
+
+"magento-php-fpm":
+  image: localhost:5000/magento:2.0
+  container_name: magento-php-fpm
+  links:
+    - db
+  volumes_from:
+    - composer  
+    - appdata
+  environment:
+    - APP_MAGE_MODE=default
+    - PHP_MEMORY_LIMIT=4G
+
+db:
+  image: localhost:5000/mariadb:10.0
+  container_name: magento-mariadb
+  ports:
+    - "3306:3306"
+  volumes_from:
+    - dbdata
+  environment:
+    - MYSQL_ROOT_PASSWORD=Adp1224..
+    - MYSQL_DATABASE=magento
+    - MYSQL_USER=magento
+    - MYSQL_PASSWORD=Adp1224..
+
+dbdata:
+  image: localhost:5000/true
+  container_name: magento-data-db
+  volumes:
+    - magento-data-db:/var/lib/mysql
+
+setup:
+  image: localhost:5000/magento:2.0
+  command: /usr/local/bin/mage-setup
+  links:
+    - db
+  volumes_from:
+    - composer
+    - appdata
+  environment:
+    - M2SETUP_DB_HOST=db
+    - M2SETUP_DB_NAME=magento
+    - M2SETUP_DB_USER=magento
+    - M2SETUP_DB_PASSWORD=Adp1224..
+    - M2SETUP_BASE_URL=http://192.168.0.71/
+    - M2SETUP_ADMIN_FIRSTNAME=Admin
+    - M2SETUP_ADMIN_LASTNAME=User
+    - M2SETUP_ADMIN_EMAIL=dummy@gmail.com
+    - M2SETUP_ADMIN_USER=admin
+    - M2SETUP_ADMIN_PASSWORD=Adp1224..
+    - M2SETUP_VERSION=2.0.0
+    - M2SETUP_USE_SAMPLE_DATA=false
+
