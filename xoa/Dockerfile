@@ -22,7 +22,7 @@ RUN set -x \
 
 RUN sed " \
 		s!#'/': '/path/to/xo-web/dist/'!'/': '../web/dist/'!; \
-		s!#uri: ''!uri: 'tcp://redis:6379'!; \
+		s!#uri: ''!uri: 'redis://redis:6379'!; \
 	" sample.config.yaml >.xo-server.yaml
 
 EXPOSE 80
